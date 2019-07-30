@@ -12,7 +12,10 @@
 
 <body class="bgTinyGrey">
 
-    <h4 class="center padding10">Event Emiters <img class="padding10" width="30" src="/img/nodejs-logo.png"></h4>
+    <h4 class="center padding10">
+        Event Emiters
+        <img class="padding10" width="30" src="/img/nodejs-logo.png">
+    </h4>
 
     <form method="POST" id="user-form" action="">
         <input name="id" id="user.id" type="hidden" value="" />
@@ -71,7 +74,6 @@
         var form = e.target;
 
         try {
-
             var body = {
                 webhost: window.location.protocol + "//" + window.location.host
             };
@@ -121,7 +123,7 @@
 
         inboxElement.setAttribute('data-badge', 1 + Number(counter));
 
-        var data = { message: message.data, timeout: 4000 };
+        var data = { message: message.data, timeout: 3000 };
         var popup = document.getElementById('popup');
 
         if (popup.MaterialSnackbar)

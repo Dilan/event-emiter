@@ -12,8 +12,6 @@ router.post('/users', async(req, res) => {
     let body = req.body;
     let doc;
 
-
-
     if (body.id) {
         doc = await User.update(body.id, body);
     } else {
