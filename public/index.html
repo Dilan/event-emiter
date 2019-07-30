@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Events</title>
+    <link href="/css/material.indigo-pink.min.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
+    <script src="/js/material.min.js" defer></script>
+
+</head>
+
+<body class="bgTinyGrey">
+
+    <h4 class="center padding10">Event Emiters <img class="padding10" width="30" src="/img/nodejs-logo.png"></h4>
+
+    <form method="POST" id="user-form" action="">
+        <input name="id" id="user.id" type="hidden" value="" />
+        <div class="mdl-grid center borderGrey w500 bgWhite">
+            <div class="mdl-cell mdl-cell--6-col">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                  <input class="mdl-textfield__input" type="text" id="name" name="name" />
+                  <label class="mdl-textfield__label" for="name">Name</label>
+                </div>
+            </div>
+            <div class="mdl-cell mdl-cell--6-col">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                  <input class="mdl-textfield__input" type="text" id="department" name="department" />
+                  <label class="mdl-textfield__label" for="department">Department</label>
+                </div>
+            </div>
+            <div class="mdl-cell mdl-cell--12-col h60">
+                <div class="float">
+                  <button id="submit-button" class="mdl-button mdl-js-button mdl-js-ripple-effect submit">
+                      Submit
+                  </button>
+                </div>
+                <div class="float left20">
+                    <p class="loader" id="loading" style="display:none"></p>
+                </div>
+            </div>
+        </div>
+        <div class="mdl-grid center w500">
+            <div class="mdl-cell mdl-cell--12-col">
+                <span class="mdl-badge" data-badge="0" id="inbox">Inbox</span>
+            </div>
+        </div>
+    </form>
+
+    <div id="popup" class="mdl-js-snackbar mdl-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+
+</body>
+
+<script>
+
+    var show = function(id)      { document.getElementById(id).style.display = 'block'; };
+    var hide = function(id)      { document.getElementById(id).style.display = 'none';  };
+    var disable = function(id)   { document.getElementById(id).disabled = true;          };
+    var active = function(id)    { document.getElementById(id).disabled = false;         };
+    var addClass = function(id, className)  { document.getElementById(id).classList.add(className); };
+
+    var onSubmitHandler = async function(e) {
+        e.preventDefault();
+
+        show('loading');          // 1. show loading spinner
+        disable('submit-button'); // 2. disable [confirm] button
+
+        var form = e.target;
+
+        try {
+
+            var body = {
+                webhost: window.location.protocol + "//" + window.location.host
+            };
+            for (var i=0; i < form.elements.length; i++) {
+                var element = form.elements[i];
+                if (element.type == 'submit') continue;
+                body[element.name] = element.value
+            }
+
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body),
+            });
+            const data = await response.json();
+
+            document.getElementById('user.id').value = data['id'];
+
+            hide('loading');          // 1. hide loading spinner
+            active('submit-button');  // 2. enable [confirm] button
+
+        } catch (err) {
+            console.log(err)
+            alert('Sorry. Some error take place.');
+        }
+    };
+
+    (function() {
+        // on submit
+        var form = document.getElementById('user-form');
+        form.addEventListener('submit', onSubmitHandler, false);
+
+    })();
+
+    // var ws = new WebSocket('ws://localhost:5001');
+    var ws = new WebSocket('ws://' + window.location.host);
+    ws.onopen = function () {
+        console.log('websocket is connected ...');
+        ws.send('connected')
+    }
+    // event emmited when receiving message
+    ws.onmessage = function (message) {
+        console.log(message);
+
+        var inboxElement = document.getElementById('inbox');
+        var counter = inboxElement.getAttribute('data-badge');
+
+        inboxElement.setAttribute('data-badge', 1 + Number(counter));
+
+        var data = { message: message.data, timeout: 4000 };
+        var popup = document.getElementById('popup');
+
+        if (popup.MaterialSnackbar)
+            popup.MaterialSnackbar.showSnackbar(data);
+    }
+
+</script>
+
+</html>
