@@ -5,9 +5,21 @@ const config = require('./config');
 // CLI
 if (require.main === module) {
 
+    // EventEmitter
+    const mediator = new (require('events').EventEmitter)();
+
+    mediator.on('users.create', (user) => {
+        console.log(`User ${user.id} were created.`);
+    });
+    mediator.on('users.update', (user) => {
+        console.log(`User ${user.id} were updated.`);
+    });
+
+
     // mongo ===================================================================
     var uri = config.mongo.uri;
 
+    mongoose.plugin(require('./src/plugins/mongoose.schema').init(mediator));
     mongoose.connect(uri, { useNewUrlParser: true });
     mongoose.set('useFindAndModify', false);
     mongoose.connection.on('connected', function() {
