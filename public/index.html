@@ -111,5 +111,25 @@
 
     })();
 
+    var ws = new WebSocket('ws://' + window.location.host);
+    ws.onopen = function () {
+        console.log('websocket is connected ...');
+    }
+    // event emmited when receiving message
+    ws.onmessage = function (message) {
+        console.log(message);
+
+        var inboxElement = document.getElementById('inbox');
+        var counter = inboxElement.getAttribute('data-badge');
+
+        inboxElement.setAttribute('data-badge', 1 + Number(counter));
+
+        var data = { message: message.data, timeout: 3000 };
+        var popup = document.getElementById('popup');
+
+        if (popup.MaterialSnackbar)
+            popup.MaterialSnackbar.showSnackbar(data);
+    }
+
 </script>
 </html>

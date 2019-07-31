@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const config = require('./config');
+const WebSocket = require('ws');
 
 // CLI
 if (require.main === module) {
@@ -66,6 +67,19 @@ if (require.main === module) {
             console.log(err);
         })
         .listen(port);
+
+    // init WebSocket server
+    const wss = new WebSocket.Server({ server });
+    wss.on('connection', (ws) => {
+       ws.on('message', (message) => {
+           console.log('received: %s', message);
+           ws.send(`Hello, you sent -> ${message}`);
+       });
+
+       mediator.on('websocket.message', (message) => {
+           ws.send(message);
+       });
+    });
 
     // uncaught exceptions and rejections ======================================
     process.on('uncaughtException', function (err) {

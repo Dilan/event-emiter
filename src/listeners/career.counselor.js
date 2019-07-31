@@ -14,6 +14,10 @@ const init = function(mediator) {
             diff.forEach((item) => {
                 if (item['kind'] == 'E' && item['path'][0] == 'department') {
                     console.log(`Career counselor were notified on changing department`);
+
+                    setTimeout(() => {
+                        mediator.emit('websocket.message', `Career counselor were notified on changing department`)
+                    }, 1000);
                 }
             });
         }
