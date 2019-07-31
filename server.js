@@ -11,7 +11,7 @@ if (require.main === module) {
     mongoose.connect(uri, { useNewUrlParser: true });
     mongoose.set('useFindAndModify', false);
     mongoose.connection.on('connected', function() {
-        console.log('Mongoose connection open to ' + uri);
+        console.log('🔋  Mongoose connection open to ' + uri);
     });
 
     // application =============================================================
