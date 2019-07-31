@@ -13,7 +13,7 @@ module.exports = function(Model, newInstance) {
     const update = async(id, data) => {
         data['updated_at'] = new Date();
         return await new Promise((resolve, reject) => {
-            Model.findByIdAndUpdate(id, { $set: data }, { new: true }, function(err, doc) {
+            Model.findByIdAndUpdate(id, { $set: data, $inc: { __v: 1 } }, { new: true }, function(err, doc) {
                 if (err) return reject(err);
                 resolve(doc);
             });

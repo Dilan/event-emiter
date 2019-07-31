@@ -1,37 +1,27 @@
-const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const config = require('./config');
-const WebSocket = require('ws');
 
-const bootstrap = {
-    mediator: function() {
-        return new (require('events').EventEmitter)();
-    },
-    initAllEventListeners: function(mediator) {
-        require('./src/events').initAll(mediator);
-    },
-    mongo: function(mediator) {
-        var uri = config.mongo.uri;
+// CLI
+if (require.main === module) {
 
-        mongoose.plugin(require('./src/plugins/mongoose.schema').init(mediator));
-        mongoose.connect(uri, { useNewUrlParser: true });
-        mongoose.set('useFindAndModify', false);
-        mongoose.connection.on('connected', function() {
-            console.log('Mongoose connection open to ' + uri);
-        });
-    }
-};
+    // mongo ===================================================================
+    var uri = config.mongo.uri;
 
-const application = function() {
+    mongoose.connect(uri, { useNewUrlParser: true });
+    mongoose.set('useFindAndModify', false);
+    mongoose.connection.on('connected', function() {
+        console.log('Mongoose connection open to ' + uri);
+    });
+
+    // application =============================================================
     var app = express();
-    app.set('trust proxy', 'loopback');
 
-    // middleware
+    app.set('trust proxy', 'loopback');
     var bodyParser = require('body-parser');
     app.use(bodyParser.json({ limit: '50mb' }));
     app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-    app.use(express.static(path.join(__dirname, './public')));
+    app.use(express.static('./public'));
 
     // logging every http request
     app.use(function(req, res, next) {
@@ -43,28 +33,17 @@ const application = function() {
         next();
     });
 
+    // routes
     app.get('/', function(req, res) { res.json({ status: 'success' }); });
-    app.use('/api', require('./src/routes'));
+    app.use('/api/users', require('./src/routes/users'));
 
     app.use(function errorHandler (err, req, res, next) {
-        if (res.headersSent) {
+        if (res.headersSent)
             return next(err);
-        }
         return res.status(500).json({ error: 'Unexpected error.' });
     });
 
-    return app;
-}
-
-// CLI: start server
-if (require.main === module) {
-
-    const mediator = bootstrap.mediator();
-
-    bootstrap.initAllEventListeners(mediator);
-    bootstrap.mongo(mediator);
-
-    var app = application();
+    // http server =============================================================
     var port = config.app.port;
 
     var server = require('http').createServer(app)
@@ -76,19 +55,7 @@ if (require.main === module) {
         })
         .listen(port);
 
-    // init WebSocket server
-    const wss = new WebSocket.Server({ server });
-    wss.on('connection', (ws) => {
-        ws.on('message', (message) => {
-            console.log('received: %s', message);
-            ws.send(`Hello, you sent -> ${message}`);
-        });
-
-        mediator.on('websocket.message', (message) => {
-            ws.send(message);
-        });
-    });
-
+    // uncaught exceptions and rejections ======================================
     process.on('uncaughtException', function (err) {
         console.error(err);
         process.exit(1);
@@ -98,6 +65,3 @@ if (require.main === module) {
       process.exit(1);
     });
 }
-
-module.exports.app = application;
-module.exports.bootstrap = bootstrap;
