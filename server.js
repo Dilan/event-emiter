@@ -8,13 +8,13 @@ if (require.main === module) {
     // EventEmitter
     const mediator = new (require('events').EventEmitter)();
 
-    mediator.on('users.create', (user) => {
-        console.log(`User ${user.id} were created.`);
-    });
-    mediator.on('users.update', (user, diff) => {
-        console.log(`User ${user.id} were updated. Diff is:`, diff);
-    });
+    const listeners = require('./src/listeners').init(mediator);
+    const { careerCounselor, accountManager, onedrive } = listeners;
 
+    mediator.on('users.create', onedrive.createAccount);
+    mediator.on('users.create', accountManager.notifyOnNewUser);
+    mediator.on('users.update', accountManager.notifyOnUserUpdate);
+    mediator.on('users.update', careerCounselor.notifyOnChangingDepartment);
 
     // mongo ===================================================================
     var uri = config.mongo.uri;

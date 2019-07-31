@@ -20,22 +20,8 @@ router.post('/', async(req, res) => {
 
     if (body.id)
         doc = await User.update(body.id, body);
-
-        // 1) On user change (something) -> notify account manager
-        // 2) On user change department notify career counselor
-
     else
         doc = await User.create(body);
-
-        // 1) On user create -> create OneDrive
-        // ... call OneDrive account function
-        // or
-        // ... exec background task / or put to rabbitmq
-
-        // ---------------------------------------------------------------------
-
-        // 2) On user create -> notify account manager
-
 
     // emulate delay
     setTimeout(() => {
