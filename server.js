@@ -11,8 +11,8 @@ if (require.main === module) {
     mediator.on('users.create', (user) => {
         console.log(`User ${user.id} were created.`);
     });
-    mediator.on('users.update', (user) => {
-        console.log(`User ${user.id} were updated.`);
+    mediator.on('users.update', (user, diff) => {
+        console.log(`User ${user.id} were updated. Diff is:`, diff);
     });
 
 
