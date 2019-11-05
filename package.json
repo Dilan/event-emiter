@@ -11,7 +11,7 @@
         "express": "4.16.3",
         "express-prettify": "0.1.0",
         "connect-multiparty": "2.2.0",
-        "mongoose": "5.6.0",
+        "mongoose": "5.7.5",
         "request": "2.88.0",
         "ws": "7.1.1",
         "ejs": "2.6.1",
