@@ -94,6 +94,9 @@
 
             hide('loading');          // 1. hide loading spinner
             active('submit-button');  // 2. enable [confirm] button
+                                      // 3. message popup
+            var d = { message: 'User saved', timeout: 1000 };
+            document.getElementById('popup').MaterialSnackbar.showSnackbar(d);
 
         } catch (err) {
             console.log(err)
@@ -108,11 +111,9 @@
 
     })();
 
-    // var ws = new WebSocket('ws://localhost:5001');
     var ws = new WebSocket('ws://' + window.location.host);
     ws.onopen = function () {
         console.log('websocket is connected ...');
-        ws.send('connected')
     }
     // event emmited when receiving message
     ws.onmessage = function (message) {
@@ -131,5 +132,4 @@
     }
 
 </script>
-
 </html>

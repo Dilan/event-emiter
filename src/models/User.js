@@ -1,4 +1,3 @@
-const nanoid = require('nanoid');
 const mongoose = require('mongoose');
 const AbstractModel = require('./Abstract');
 mongoose.Promise = Promise;

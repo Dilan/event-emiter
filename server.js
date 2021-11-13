@@ -1,15 +1,15 @@
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
-const config = require('./config');
 const WebSocket = require('ws');
+const config = require('./config');
 
 const bootstrap = {
     mediator: function() {
         return new (require('events').EventEmitter)();
     },
     initAllEventListeners: function(mediator) {
-        require('./src/events').initAllListeners(mediator);
+        require('./src/listeners').initAllListeners(mediator);
     },
     mongo: function(mediator) {
         var uri = config.mongo.uri;
@@ -18,7 +18,7 @@ const bootstrap = {
         mongoose.connect(uri, { useNewUrlParser: true });
 
         mongoose.connection.on('connected', function() {
-            console.log('Mongoose connection open to ' + uri);
+            console.log('🔋  Mongoose connection open to ' + uri);
         });
     }
 };
@@ -42,8 +42,9 @@ const application = function() {
         next();
     });
 
+    // routes
     app.get('/', function(req, res) { res.json({ status: 'success' }); });
-    app.use('/api', require('./src/routes'));
+    app.use('/api/users', require('./src/routes/users'));
 
     app.use(function errorHandler (err, req, res, next) {
         if (res.headersSent) {
@@ -55,9 +56,10 @@ const application = function() {
     return app;
 }
 
-// CLI: start server
+// CLI
 if (require.main === module) {
 
+    // EventEmitter
     const mediator = bootstrap.mediator();
 
     bootstrap.initAllEventListeners(mediator);
