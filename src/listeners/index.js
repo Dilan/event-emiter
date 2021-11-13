@@ -1,11 +1,15 @@
-const careerCounselor = require('./career.counselor');
-const accountManager = require('./account.manager');
-const onedrive = require('./onedrive');
+const careerCounselorInit = require('./career.counselor').init;
+const accountManagerInit = require('./account.manager').init;
+const onedriveInit       = require('./onedrive').init;
 
-module.exports.init = function(mediator) {
-    return {
-        careerCounselor:    careerCounselor.init(mediator),
-        accountManager:     accountManager.init(mediator),
-        onedrive:           onedrive.init(mediator),
-    };
+module.exports.initAllListeners = function(mediator) {
+
+    const careerCounselor = careerCounselorInit(mediator);
+    const accountManager  = accountManagerInit(mediator);
+    const onedrive        = onedriveInit(mediator);
+    
+    mediator.on('users.create', onedrive.createAccount);
+    mediator.on('users.create', accountManager.notifyOnNewUser);
+    mediator.on('users.update', accountManager.notifyOnUserUpdate);
+    mediator.on('users.update', careerCounselor.notifyOnChangingDepartment);
 }

@@ -4,33 +4,29 @@ const mongoose = require('mongoose');
 const WebSocket = require('ws');
 const config = require('./config');
 
-// CLI
-if (require.main === module) {
+const bootstrap = {
+    mediator: function() {
+        return new (require('events').EventEmitter)();
+    },
+    initAllEventListeners: function(mediator) {
+        require('./src/listeners').initAllListeners(mediator);
+    },
+    mongo: function(mediator) {
+        var uri = config.mongo.uri;
 
-    // EventEmitter
-    const mediator = new (require('events').EventEmitter)();
+        mongoose.plugin(require('./src/plugins/mongoose.schema').init(mediator));
+        mongoose.connect(uri, { useNewUrlParser: true });
 
-    const listeners = require('./src/listeners').init(mediator);
-    const { careerCounselor, accountManager, onedrive } = listeners;
+        mongoose.connection.on('connected', function() {
+            console.log('🔋  Mongoose connection open to ' + uri);
+        });
+    }
+};
 
-    mediator.on('users.create', onedrive.createAccount);
-    mediator.on('users.create', accountManager.notifyOnNewUser);
-    mediator.on('users.update', accountManager.notifyOnUserUpdate);
-    mediator.on('users.update', careerCounselor.notifyOnChangingDepartment);
-
-    // mongo ===================================================================
-    var uri = config.mongo.uri;
-
-    mongoose.plugin(require('./src/plugins/mongoose.schema').init(mediator));
-    mongoose.connect(uri, { useNewUrlParser: true });
-    mongoose.connection.on('connected', function() {
-        console.log('🔋  Mongoose connection open to ' + uri);
-    });
-
-    // application =============================================================
+const application = function() {
     var app = express();
-
     app.set('trust proxy', 'loopback');
+
     // middleware
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
@@ -51,12 +47,25 @@ if (require.main === module) {
     app.use('/api/users', require('./src/routes/users'));
 
     app.use(function errorHandler (err, req, res, next) {
-        if (res.headersSent)
+        if (res.headersSent) {
             return next(err);
+        }
         return res.status(500).json({ error: 'Unexpected error.' });
     });
 
-    // http server =============================================================
+    return app;
+}
+
+// CLI
+if (require.main === module) {
+
+    // EventEmitter
+    const mediator = bootstrap.mediator();
+
+    bootstrap.initAllEventListeners(mediator);
+    bootstrap.mongo(mediator);
+
+    var app = application();
     var port = config.app.port;
 
     var server = require('http').createServer(app)
@@ -71,17 +80,16 @@ if (require.main === module) {
     // init WebSocket server
     const wss = new WebSocket.Server({ server });
     wss.on('connection', (ws) => {
-       ws.on('message', (message) => {
-           console.log('received: %s', message);
-           ws.send(`Hello, you sent -> ${message}`);
-       });
+        ws.on('message', (message) => {
+            console.log('received: %s', message);
+            ws.send(`Hello, you sent -> ${message}`);
+        });
 
-       mediator.on('websocket.message', (message) => {
-           ws.send(message);
-       });
+        mediator.on('websocket.message', (message) => {
+            ws.send(message);
+        });
     });
 
-    // uncaught exceptions and rejections ======================================
     process.on('uncaughtException', function (err) {
         console.error(err);
         process.exit(1);
@@ -91,3 +99,6 @@ if (require.main === module) {
       process.exit(1);
     });
 }
+
+module.exports.app = application;
+module.exports.bootstrap = bootstrap;
