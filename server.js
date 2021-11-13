@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const config = require('./config');
@@ -9,7 +10,6 @@ if (require.main === module) {
     var uri = config.mongo.uri;
 
     mongoose.connect(uri, { useNewUrlParser: true });
-    mongoose.set('useFindAndModify', false);
     mongoose.connection.on('connected', function() {
         console.log('🔋  Mongoose connection open to ' + uri);
     });
@@ -18,10 +18,9 @@ if (require.main === module) {
     var app = express();
 
     app.set('trust proxy', 'loopback');
-    var bodyParser = require('body-parser');
-    app.use(bodyParser.json({ limit: '50mb' }));
-    app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-    app.use(express.static('./public'));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.static(path.join(__dirname, './public')));
 
     // logging every http request
     app.use(function(req, res, next) {
