@@ -4,7 +4,7 @@ const config = require('../../config');
 const init = function(mediator) {
     return {
         onUserCreate: function(user) {
-            console.log('Email Listener :: on User created', user);
+            console.log('Websocket Listener :: on User created', user);
 
             setTimeout(() => {
                 mediator.emit('websocket.message', `user ${user.id} were created.`)
@@ -16,7 +16,7 @@ const init = function(mediator) {
             diff: [ DiffEdit { kind: 'E', path: [ 'amount' ], lhs: 1300, rhs: 5300 }]
         */
         onUserUpdate: function(user, diff) {
-            console.log('Email Listener :: on User changed', diff);
+            console.log('Websocket Listener :: on User changed', diff);
 
             var msgList = [];
             diff.forEach((item) => {

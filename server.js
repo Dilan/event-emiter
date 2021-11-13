@@ -9,7 +9,7 @@ const bootstrap = {
         return new (require('events').EventEmitter)();
     },
     initAllEventListeners: function(mediator) {
-        require('./src/events').initAll(mediator);
+        require('./src/events').initAllListeners(mediator);
     },
     mongo: function(mediator) {
         var uri = config.mongo.uri;
