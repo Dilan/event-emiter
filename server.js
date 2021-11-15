@@ -43,7 +43,7 @@ const application = function() {
     });
 
     // routes
-    app.get('/', function(req, res) { res.json({ status: 'success' }); });
+    app.get('/api', function(req, res) { res.json({ status: 'success' }); });
     app.use('/api/users', require('./src/routes/users'));
 
     app.use(function errorHandler (err, req, res, next) {
