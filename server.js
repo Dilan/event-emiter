@@ -21,7 +21,6 @@ if (require.main === module) {
 
     mongoose.plugin(require('./src/plugins/mongoose.schema').init(mediator));
     mongoose.connect(uri, { useNewUrlParser: true });
-    mongoose.set('useFindAndModify', false);
     mongoose.connection.on('connected', function() {
         console.log('🔋  Mongoose connection open to ' + uri);
     });
