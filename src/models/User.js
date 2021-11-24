@@ -1,8 +1,6 @@
-const shortid = require('shortid');
 const mongoose = require('mongoose');
 const AbstractModel = require('./Abstract');
 mongoose.Promise = Promise;
-mongoose.set('useCreateIndex', true);
 
 const userSchema = new mongoose.Schema({
     name: {
